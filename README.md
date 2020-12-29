@@ -1,21 +1,29 @@
 # city_explorer_api
 
 **Author**: Terrence Jamal Simms
-**Version**: 1.0.0 (increment the patch/fix version number if you make more commits past your first submission)
+**Version**: 1.1.0 (increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
-<!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
+City Explorer is the all in one traveling app that allows you to enter into a search a city you would like in depth information about and receive information in regards to, places to dine, movies, hiking spots, and more!---
+
+This is an app created to provide information to a user in regards to an input of a particular city and feedback data on that city.
 
 ## Getting Started
-<!-- What are the steps that a user must take in order to build this app on their own machine and get it running? -->
+Need to install dotenv dependency
+Need to install Express dependency
+Need to install Cors dependency
+Need to designate a port inside of your .env file
 
 ## Architecture
-<!-- Provide a detailed description of the application design. What technologies (languages, libraries, etc) you're using, and any other relevant design information. -->
+
+This server only variant of this app uses Javascript and JS Node
 
 ## Change Log
-<!-- Use this area to document the iterative changes made to your application as each feature is successfully implemented. Use time stamps. Here's an examples:
+12-23-2020 7:00pm - Created initial framework for server and installed required dependencies
 
-01-01-2001 4:59pm - Application now has a fully-functional express server, with a GET route for the location resource.
+12-26-2020 10:00pm - Wrote required code for app pages and location
+
+12-28-2020 10:30pm - Cleaned up and code and finished project. Application fully functional per assignment Lab 6.
 
 ## Credits and Collaborations
-<!-- Give credit (and a link) to other people or resources that helped you build this application. -->
+In Class Demo, Code Review, Jenner Dulce, Mark Duenas, Cristian Robles, TA Help
