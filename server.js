@@ -63,6 +63,7 @@ function Location(city, locationData) {
   this.longitude = locationData[0].lon;
 }
 
+
 function Weather(data) {
   this.forecast = data.weather.description;
   let date = Date.parse(data.datetime);
