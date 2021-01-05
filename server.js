@@ -5,9 +5,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.use(cors());
 
 
@@ -21,7 +22,7 @@ app.use('*', errorPage);
 
 
 
-
+// Request Handlers
 
 function homePage(request, response) {
   response.send('Hello World');
@@ -32,35 +33,54 @@ function errorPage(request, response) {
 }
 
 function locationHandler(request, response) {
-
   const city = request.query.city;
+  const key = process.env.LOCATIONIQ_API_KEY;
+  const url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
+
 
   if (city === '' || !city) {
     response.status(500);
     response.send('Sorry, something went wrong');
   }
-
-  const locationData = require('./data/location.json');
-
-  const sendData = new Location(city, locationData);
-
-  response.send(sendData);
+  superagent.get(url)
+    .then(data => {
+      const locationData = data.body[0];
+      const sendData = new Location(city, locationData);
+      response.send(sendData);
+    });
 }
 
 function weatherHandler(request, response) {
-  const weatherData = require('./data/weather.json');
-  let weatherArray = [];
-  weatherData.data.forEach(weatherItem => {
-    weatherArray.push(new Weather(weatherItem));
-  });
-  response.send(weatherArray);
+  const lat = request.query.latitude;
+  const lon = request.query.longitude;
+  const key = process.env.WEATHERBIT_API_KEY;
+  const url = `http://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${lon}&key=${key}`;
+
+  superagent.get(url)
+    .then(value => {
+      const weatherData = value.body.data;
+
+      const newWeatherData = weatherData.map(weathervalue => {
+        return new Weather(weathervalue);
+      });
+      response.send(newWeatherData);
+    });
+  // const weatherData = require('./data/weather.json');
+  // let weatherArray = [];
+  // weatherData.data.forEach(weatherItem => {
+  //   weatherArray.push(new Weather(weatherItem));
+  // });
+  // response.send(weatherArray);
 }
 
+
+
+// Constructors
 function Location(city, locationData) {
   this.search_qeury = city;
-  this.formatted_query = locationData[0].display_name;
-  this.latitude = locationData[0].lat;
-  this.longitude = locationData[0].lon;
+  this.formatted_query = locationData.display_name;
+  this.latitude = locationData.lat;
+  this.longitude = locationData.lon;
 }
 
 
@@ -70,6 +90,7 @@ function Weather(data) {
 }
 
 
+// App Initialization
 app.listen(PORT, () => {
   console.log(`Now Listening on Port ${PORT}`);
 });
