@@ -6,13 +6,17 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
+const pg = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const client = new pg.Client(process.env.DATABASE_URL);
 app.use(cors());
 
 
-
+client.on('error', err => {
+  throw err;
+});
 
 // Routes
 app.get('/', homePage);
@@ -33,6 +37,7 @@ function errorPage(request, response) {
 }
 
 function locationHandler(request, response) {
+
   const city = request.query.city;
   const key = process.env.LOCATIONIQ_API_KEY;
   const url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
@@ -42,12 +47,36 @@ function locationHandler(request, response) {
     response.status(500);
     response.send('Sorry, something went wrong');
   }
-  superagent.get(url)
-    .then(data => {
-      const locationData = data.body[0];
-      const sendData = new Location(city, locationData);
-      response.send(sendData);
+
+  let SQL = 'SELECT search_query, longitude, latitude, formatted_query FROM location WHERE search_query = $1';
+  let safeValues = [city];
+
+  client.query(SQL, safeValues)
+    .then(results => {
+      if (results.rowCount > 0) {
+        console.log('TALKED TO DATABASE');
+        console.log('SELECT STATEMENT >>', results.rows);
+        response.send(results.rows[0]);
+      }
+      else {
+        console.log('TALKED TO API');
+        superagent.get(url)
+          .then(data => {
+            const locationData = data.body[0];
+            const sendData = new Location(city, locationData);
+            let SQL = 'INSERT INTO location (search_query, longitude, latitude, formatted_query) VALUES ($1, $2, $3, $4) RETURNING *';
+
+            let safeValues = [sendData.search_qeury, sendData.longitude, sendData.latitude, sendData.formatted_query];
+            client.query(SQL, safeValues)
+              .then(results => {
+                console.log(results);
+              });
+            response.status(200).send(sendData);
+          });
+      }
     });
+
+
 }
 
 function weatherHandler(request, response) {
@@ -65,12 +94,6 @@ function weatherHandler(request, response) {
       });
       response.send(newWeatherData);
     });
-  // const weatherData = require('./data/weather.json');
-  // let weatherArray = [];
-  // weatherData.data.forEach(weatherItem => {
-  //   weatherArray.push(new Weather(weatherItem));
-  // });
-  // response.send(weatherArray);
 }
 
 
@@ -91,6 +114,11 @@ function Weather(data) {
 
 
 // App Initialization
-app.listen(PORT, () => {
-  console.log(`Now Listening on Port ${PORT}`);
-});
+client.connect()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Now Listening on Port ${PORT}`);
+      console.log(`Connected to database ${client.connectionParameters.database}`);
+    });
+
+  });
