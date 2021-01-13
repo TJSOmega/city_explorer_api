@@ -1,7 +1,7 @@
 # city_explorer_api
 
 **Author**: Terrence Jamal Simms
-**Version**: 1.3.0 (increment the patch/fix version number if you make more commits past your first submission)
+**Version**: 1.4.0 (increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
 City Explorer is the all in one traveling app that allows you to enter into a search a city you would like in depth information about and receive information in regards to, places to dine, movies, hiking spots, and more!---
@@ -16,6 +16,7 @@ Need to designate a port inside of your .env file
 Need to install superagent dependency
 Need a weatherbit.io API Key
 Need a LocationIQ API Key
+Need a MoviesDB API Key
 
 ## Architecture
 
@@ -29,6 +30,8 @@ This server only variant of this app uses Javascript and JS Node
 12-28-2020 10:30pm - Cleaned up and code and finished project. Application fully functional per assignment Lab 6.
 
 1/2/2021 3:00pm - Added connection to weather and location APIs
+
+1/10/2021 - Added in the functionality for movies to be pulled into the front end from the server, created through a constructor on the backend and an API call to Moviesdb
 
 ## Credits and Collaborations
 In Class Demo, Code Review, Jenner Dulce, Mark Duenas, Cristian Robles, TA Help
