@@ -22,7 +22,8 @@ client.on('error', err => {
 app.get('/', homePage);
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
-app.use('*', errorPage);
+app.get('/movies', movieHandler);
+app.get('*', errorPage);
 
 
 
@@ -54,12 +55,10 @@ function locationHandler(request, response) {
   client.query(SQL, safeValues)
     .then(results => {
       if (results.rowCount > 0) {
-        console.log('TALKED TO DATABASE');
         console.log('SELECT STATEMENT >>', results.rows);
         response.send(results.rows[0]);
       }
       else {
-        console.log('TALKED TO API');
         superagent.get(url)
           .then(data => {
             const locationData = data.body[0];
@@ -96,6 +95,26 @@ function weatherHandler(request, response) {
     });
 }
 
+function movieHandler(request, response) {
+  const key = process.env.MOVIESDB_API_KEY;
+  const city = request.query.search_query;
+  const url = `https://api.themoviedb.org/3/search/movie`;
+  console.log(request.query);
+  superagent.get(url)
+    .query({
+      api_key: key,
+      query: city
+    })
+    .then(data => {
+      const movie = data.body.results;
+      console.log(movie);
+      const moviesArray = movie.map(value => {
+        return new Movies(value);
+      });
+      response.send(moviesArray);
+    });
+}
+
 
 
 // Constructors
@@ -112,6 +131,15 @@ function Weather(data) {
   this.time = new Date(data.datetime).toDateString();
 }
 
+function Movies(data) {
+  this.title = data.original_title;
+  this.overview = data.overview;
+  this.average_votes = data.vote_average;
+  this.total_votes = data.vote_count;
+  this.image_url = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
+  this.popularity = data.popularity;
+  this.release_on = data.release_date;
+}
 
 // App Initialization
 client.connect()
@@ -120,5 +148,4 @@ client.connect()
       console.log(`Now Listening on Port ${PORT}`);
       console.log(`Connected to database ${client.connectionParameters.database}`);
     });
-
   });
