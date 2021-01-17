@@ -23,6 +23,7 @@ app.get('/', homePage);
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
 app.get('/movies', movieHandler);
+app.get('/yelp', yelpHandler);
 app.get('*', errorPage);
 
 
@@ -115,6 +116,31 @@ function movieHandler(request, response) {
     });
 }
 
+function yelpHandler(request, response) {
+  const key = process.env.YELP_API_KEY;
+  const url = `https://api.yelp.com/v3/businesses/search`;
+  const numPerPage = 5;
+  const page = request.query.page || 1;
+  const start = ((page - 1) * numPerPage + 1);
+  let queryList = {
+    latitude: request.query.latitude,
+    longitude: request.query.longitude,
+    limit: numPerPage,
+    offset: start
+  };
+  superagent.get(url)
+    .set('Authorization', `Bearer ${key}`)
+    .query(queryList)
+    .then(data => {
+      const restaurant = data.body.businesses;
+      const restArray = restaurant.map( value => {
+        return new Yelp(value);
+      });
+      console.log(restArray);
+      response.send(restArray);
+    });
+}
+
 
 
 // Constructors
@@ -140,6 +166,15 @@ function Movies(data) {
   this.popularity = data.popularity;
   this.release_on = data.release_date;
 }
+
+function Yelp(data) {
+  this.name = data.name;
+  this.image_url = data.image_url;
+  this.price = data.price;
+  this.rating = data.rating;
+  this.url = data.url;
+}
+
 
 // App Initialization
 client.connect()
